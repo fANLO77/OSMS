@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 TxPowerBS = 46 #Дбм
 TxPowerUE = 24 #Дбм
@@ -59,7 +60,7 @@ print(f"Количество базовых станций: {NBS_UMiNLOS:.4f}\n"
 
 
 terrian = ['DU', 'U', 'SU', 'RURAL', 'ROAD']
-d_Hat = np.linspace(0.1, 100, 100)
+d_Hat = np.linspace(0.1, 100, 1000)
 for i, fig in zip(terrian, range(1, len(terrian)+1)):
     if i in ('DU', 'U'):
         a_hms = 3.2 * (np.log10(11.75 * hms))**2 - 4.97
@@ -187,4 +188,25 @@ plt.title('Зависимость потерь сигнала от рассто�
 plt.legend()
 plt.tight_layout()
 
+
+
+f_range = np.linspace(1500, 2000, 1000)    
+hBS_range = np.linspace(30, 200, 1000)   
+F, HBS = np.meshgrid(f_range, hBS_range)
+a_hms = 3.2 * (np.log10(11.75 * hms))**2 - 4.97
+Lclutter = 0
+C = A + B * np.log10(F) - 13.82 * np.log10(HBS) - a_hms + Lclutter
+s1 = 44.9 - 6.55 * np.log10(F)
+d_UL = 10 ** ((MAPL_UL - C) / s1)
+d_DL = 10 ** ((MAPL_DL - C) / s1)
+R = np.minimum(d_UL, d_DL)
+
+fig = plt.figure(8)
+ax = fig.add_subplot(111, projection='3d')
+surface = ax.plot_surface(HBS, F, R, cmap='viridis')
+ax.set_xlabel('Высота подвеса БС, м')
+ax.set_ylabel('Частота f, МГц')
+ax.set_zlabel('Радиус соты R, км')
+ax.view_init(elev=25, azim=-135)
+plt.tight_layout()
 plt.show()
